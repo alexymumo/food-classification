@@ -18,10 +18,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.foodapp.R;
+import com.example.foodapp.ml.Food;
 
-import com.example.foodapp.ml.Model;
 
 import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.schema.Model;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.IOException;
@@ -30,10 +31,10 @@ import java.nio.ByteOrder;
 
 public class MainActivity extends AppCompatActivity {
     private static final int IMAGE_CAPTURE_CODE = 1;
-    private static final int IMAGE_WIDTH = 32;
-    private static final int IMAGE_HEIGHT = 32;
+    private static final int IMAGE_WIDTH = 224;
+    private static final int IMAGE_HEIGHT = 224;
     private static final int FOODS = 3;
-    int IMAGE_SIZE = 32;
+    int IMAGE_SIZE = 224;
     private Button cameraBtn, galleryBtn;
     TextView resultTextView;
     ImageView imageView;
@@ -84,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
     }
     public void classifyFood(Bitmap bitmap) {
         try {
-            Model model = Model.newInstance(getApplicationContext());
+            Food model = Food.newInstance(getApplicationContext());
 
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 32, 32, 3}, DataType.FLOAT32);
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, IMAGE_SIZE, IMAGE_SIZE, 3}, DataType.FLOAT32);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * IMAGE_SIZE * IMAGE_SIZE * 3);
             byteBuffer.order(ByteOrder.nativeOrder());
 
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             inputFeature0.loadBuffer(byteBuffer);
 
             // Runs model inference and gets result.
-            Model.Outputs outputs = model.process(inputFeature0);
+            Food.Outputs outputs = model.process(inputFeature0);
             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
             float[] confidences = outputFeature0.getFloatArray();
@@ -119,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     maxPos = i;
                 }
             }
-            String[] classes = {"Apple", "Banana", "Orange"};
+            String[] classes = {"carrot_cake", "fish_and_chips", "fried_rice"};
             resultTextView.setText(classes[maxPos]);
             model.close();
 
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(resultCode == RESULT_OK){
-            if(requestCode == 3){
+            if(requestCode == 100){
                 Bitmap image = (Bitmap) data.getExtras().get("data");
                 int dimension = Math.min(image.getWidth(), image.getHeight());
                 image = ThumbnailUtils.extractThumbnail(image, dimension, dimension);
