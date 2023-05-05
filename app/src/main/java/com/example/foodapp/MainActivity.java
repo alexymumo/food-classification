@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.foodapp.R;
-import com.example.foodapp.ml.Food;
+import com.example.foodapp.ml.Foods;
 
 
 import org.tensorflow.lite.DataType;
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int IMAGE_CAPTURE_CODE = 1;
     private static final int IMAGE_WIDTH = 224;
     private static final int IMAGE_HEIGHT = 224;
-    private static final int FOODS = 3;
+    private static final int FOODS = 6;
     int IMAGE_SIZE = 224;
     private Button cameraBtn, galleryBtn;
     TextView resultTextView;
@@ -48,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
         galleryBtn = findViewById(R.id.galleryBtn);
         resultTextView = findViewById(R.id.result);
         imageView = findViewById(R.id.foodImage);
+        /*carrot_cake
+coke
+diet
+fish_and_chips
+fried_rice
+pepsi*/
 
 
 
@@ -85,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void classifyFood(Bitmap bitmap) {
         try {
-            Food model = Food.newInstance(getApplicationContext());
+            Foods model = Foods.newInstance(getApplicationContext());
 
             TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, IMAGE_SIZE, IMAGE_SIZE, 3}, DataType.FLOAT32);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * IMAGE_SIZE * IMAGE_SIZE * 3);
@@ -107,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             inputFeature0.loadBuffer(byteBuffer);
 
             // Runs model inference and gets result.
-            Food.Outputs outputs = model.process(inputFeature0);
+            Foods.Outputs outputs = model.process(inputFeature0);
             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
             float[] confidences = outputFeature0.getFloatArray();
@@ -120,7 +126,13 @@ public class MainActivity extends AppCompatActivity {
                     maxPos = i;
                 }
             }
-            String[] classes = {"carrot_cake", "fish_and_chips", "fried_rice"};
+            /*carrot_cake
+coke
+diet
+fish_and_chips
+fried_rice
+pepsi*/
+            String[] classes = {"carrot_cake","code","diet","fish_and_chips", "fried_rice","pepsi"};
             resultTextView.setText(classes[maxPos]);
             model.close();
 
